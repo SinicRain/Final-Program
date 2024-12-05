@@ -1,0 +1,532 @@
+import tkinter as tk
+from tkinter import ttk, messagebox, simpledialog
+import pickle
+
+# ----------------------------
+# Backend Classes and Logic
+# ----------------------------
+
+# Class representing the user of the ticketing system
+class User:
+    def __init__(self, user_id, name, email, payment_info, contact_number):
+        self.user_id = user_id
+        self.name = name
+        self.email = email
+        self.payment_info = payment_info
+        self.contact_number = contact_number
+        self.purchase_history = []  # List to store the user's purchase history
+
+    # Getters and Setters
+    def get_user_id(self):
+        return self.user_id
+
+    def set_user_id(self, user_id):
+        self.user_id = user_id
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_email(self):
+        return self.email
+
+    def set_email(self, email):
+        self.email = email
+
+    def get_payment_info(self):
+        return self.payment_info
+
+    def set_payment_info(self, payment_info):
+        self.payment_info = payment_info
+
+    def get_contact_number(self):
+        return self.contact_number
+
+    def set_contact_number(self, contact_number):
+        self.contact_number = contact_number
+
+    def get_purchase_history(self):
+        return self.purchase_history
+
+    def set_purchase_history(self, purchase_history):
+        self.purchase_history = purchase_history
+
+
+# Class representing individual attractions in the park
+class Attraction:
+    def __init__(self, attraction_id, name, capacity, status, location, operating_hours):
+        self.attraction_id = attraction_id
+        self.name = name
+        self.capacity = capacity
+        self.status = status
+        self.location = location
+        self.operating_hours = operating_hours
+
+    # Getters and Setters
+    def get_attraction_id(self):
+        return self.attraction_id
+
+    def set_attraction_id(self, attraction_id):
+        self.attraction_id = attraction_id
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_capacity(self):
+        return self.capacity
+
+    def set_capacity(self, capacity):
+        self.capacity = capacity
+
+    def get_status(self):
+        return self.status
+
+    def set_status(self, status):
+        self.status = status
+
+    def get_location(self):
+        return self.location
+
+    def set_location(self, location):
+        self.location = location
+
+    def get_operating_hours(self):
+        return self.operating_hours
+
+    def set_operating_hours(self, operating_hours):
+        self.operating_hours = operating_hours
+
+
+# Class representing the Adventure Park
+class AdventurePark:
+    def __init__(self, park_id, name, location, opening_hours, total_capacity, current_visitors, tickets, attractions, user):
+        self.park_id = park_id
+        self.name = name
+        self.location = location
+        self.opening_hours = opening_hours
+        self.total_capacity = total_capacity
+        self.current_visitors = current_visitors
+        self.tickets = tickets  # Composition: List of Ticket objects
+        self.attractions = attractions  # Composition: List of Attraction objects
+        self.user = user  # User associated with the park
+
+    # Getters and Setters
+    def get_park_id(self):
+        return self.park_id
+
+    def set_park_id(self, park_id):
+        self.park_id = park_id
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_location(self):
+        return self.location
+
+    def set_location(self, location):
+        self.location = location
+
+    def get_opening_hours(self):
+        return self.opening_hours
+
+    def set_opening_hours(self, opening_hours):
+        self.opening_hours = opening_hours
+
+    def get_total_capacity(self):
+        return self.total_capacity
+
+    def set_total_capacity(self, total_capacity):
+        self.total_capacity = total_capacity
+
+    def get_current_visitors(self):
+        return self.current_visitors
+
+    def set_current_visitors(self, current_visitors):
+        self.current_visitors = current_visitors
+
+    def get_tickets(self):
+        return self.tickets
+
+    def set_tickets(self, tickets):
+        self.tickets = tickets
+
+    def get_attractions(self):
+        return self.attractions
+
+    def set_attractions(self, attractions):
+        self.attractions = attractions
+
+    def get_user(self):
+        return self.user
+
+    def set_user(self, user):
+        self.user = user
+
+
+# Base class for tickets in the park
+class Ticket:
+    def __init__(self, ticket_id, ticket_type, price, validity, discount, limitations):
+        self.ticket_id = ticket_id
+        self.ticket_type = ticket_type
+        self.price = price
+        self.validity = validity
+        self.discount = discount
+        self.limitations = limitations
+
+    # Getters and Setters
+    def get_ticket_id(self):
+        return self.ticket_id
+
+    def set_ticket_id(self, ticket_id):
+        self.ticket_id = ticket_id
+
+    def get_ticket_type(self):
+        return self.ticket_type
+
+    def set_ticket_type(self, ticket_type):
+        self.ticket_type = ticket_type
+
+    def get_price(self):
+        return self.price
+
+    def set_price(self, price):
+        self.price = price
+
+    def get_validity(self):
+        return self.validity
+
+    def set_validity(self, validity):
+        self.validity = validity
+
+    def get_discount(self):
+        return self.discount
+
+    def set_discount(self, discount):
+        self.discount = discount
+
+    def get_limitations(self):
+        return self.limitations
+
+    def set_limitations(self, limitations):
+        self.limitations = limitations
+
+
+# Subclasses for different types of tickets
+class SingleDayPass(Ticket):
+    def __init__(self, ticket_id, price, entry_time, exit_time):
+        super().__init__(ticket_id, "Single-Day Pass", price, "1 Day", "None", "Valid only on selected date")
+        self.entry_time = entry_time
+        self.exit_time = exit_time
+
+    # Getters and Setters
+    def get_entry_time(self):
+        return self.entry_time
+
+    def set_entry_time(self, entry_time):
+        self.entry_time = entry_time
+
+    def get_exit_time(self):
+        return self.exit_time
+
+    def set_exit_time(self, exit_time):
+        self.exit_time = exit_time
+
+
+# Class for payment details
+class Payment:
+    def __init__(self, payment_id, booking, amount, payment_method, transaction_status):
+        self.payment_id = payment_id
+        self.booking = booking
+        self.amount = amount
+        self.payment_method = payment_method
+        self.transaction_status = transaction_status
+
+    # Getters and Setters
+    def get_payment_id(self):
+        return self.payment_id
+
+    def set_payment_id(self, payment_id):
+        self.payment_id = payment_id
+
+    def get_booking(self):
+        return self.booking
+
+    def set_booking(self, booking):
+        self.booking = booking
+
+    def get_amount(self):
+        return self.amount
+
+    def set_amount(self, amount):
+        self.amount = amount
+
+    def get_payment_method(self):
+        return self.payment_method
+
+    def set_payment_method(self, payment_method):
+        self.payment_method = payment_method
+
+    def get_transaction_status(self):
+        return self.transaction_status
+
+    def set_transaction_status(self, transaction_status):
+        self.transaction_status = transaction_status
+
+
+# Class for managing bookings
+class Booking:
+    def __init__(self, booking_id, user, ticket, date, payment):
+        self.booking_id = booking_id
+        self.user = user
+        self.ticket = ticket
+        self.date = date
+        self.payment = payment
+
+    # Getters and Setters
+    def get_booking_id(self):
+        return self.booking_id
+
+    def set_booking_id(self, booking_id):
+        self.booking_id = booking_id
+
+    def get_user(self):
+        return self.user
+
+    def set_user(self, user):
+        self.user = user
+
+    def get_ticket(self):
+        return self.ticket
+
+    def set_ticket(self, ticket):
+        self.ticket = ticket
+
+    def get_date(self):
+        return self.date
+
+    def set_date(self, date):
+        self.date = date
+
+    def get_payment(self):
+        return self.payment
+
+    def set_payment(self, payment):
+        self.payment = payment
+
+
+# ----------------------------
+# Graphical User Interface (GUI)
+# ----------------------------
+
+class TicketingSystemGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Adventure Park Ticketing System")
+        self.root.geometry("900x700")
+
+        # Data storage for customers, bookings, and ticket sales
+        self.customers = self.load_data('users.pkl')  # Store customers (user_id -> User object)
+        self.bookings = self.load_data('bookings.pkl')  # Store bookings
+        self.ticket_sales = {}  # Store ticket sales by type
+
+        # Create the main tabs
+        self.tab_control = ttk.Notebook(root)
+
+        self.account_tab = ttk.Frame(self.tab_control)  # Tab for managing user accounts
+        self.ticket_tab = ttk.Frame(self.tab_control)  # Tab for purchasing tickets
+        self.admin_tab = ttk.Frame(self.tab_control)  # Tab for admin-related tasks
+
+        # Add the tabs to the notebook
+        self.tab_control.add(self.account_tab, text="Account Management")
+        self.tab_control.add(self.ticket_tab, text="Ticket Purchasing")
+        self.tab_control.add(self.admin_tab, text="Admin Dashboard")
+        self.tab_control.pack(expand=1, fill="both")
+
+        # Set up each tab with its respective functions
+        self.setup_account_management()
+        self.setup_ticket_purchasing()
+        self.setup_admin_dashboard()
+
+    # Account Management Tab
+    def setup_account_management(self):
+        # UI Elements for Account Management
+        ttk.Label(self.account_tab, text="User ID:").grid(row=0, column=0, padx=10, pady=10)
+        self.user_id_entry = ttk.Entry(self.account_tab)
+        self.user_id_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        ttk.Label(self.account_tab, text="Name:").grid(row=1, column=0, padx=10, pady=10)
+        self.name_entry = ttk.Entry(self.account_tab)
+        self.name_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        ttk.Label(self.account_tab, text="Email:").grid(row=2, column=0, padx=10, pady=10)
+        self.email_entry = ttk.Entry(self.account_tab)
+        self.email_entry.grid(row=2, column=1, padx=10, pady=10)
+
+        ttk.Label(self.account_tab, text="Contact Number:").grid(row=3, column=0, padx=10, pady=10)
+        self.contact_entry = ttk.Entry(self.account_tab)
+        self.contact_entry.grid(row=3, column=1, padx=10, pady=10)
+
+        # Buttons for Account Management
+        ttk.Button(self.account_tab, text="Add Customer", command=self.add_customer).grid(row=4, column=0, padx=10, pady=10)
+        ttk.Button(self.account_tab, text="Delete Customer", command=self.delete_customer).grid(row=4, column=1, padx=10, pady=10)
+        ttk.Button(self.account_tab, text="Modify Customer", command=self.modify_customer).grid(row=5, column=0, padx=10, pady=10)
+        ttk.Button(self.account_tab, text="Display Customers", command=self.display_customers).grid(row=5, column=1, padx=10, pady=10)
+
+    # Function to add a new customer
+    def add_customer(self):
+        user_id = self.user_id_entry.get()
+        name = self.name_entry.get()
+        email = self.email_entry.get()
+        contact = self.contact_entry.get()
+
+        # Check if user ID already exists
+        if user_id in self.customers:
+            messagebox.showerror("Error", "User ID already exists!")
+        else:
+            # Create a new User object and add it to the customers dictionary
+            self.customers[user_id] = User(user_id, name, email, None, contact)
+            messagebox.showinfo("Success", "Customer added successfully!")
+            self.save_data(self.customers, 'users.pkl')
+
+    # Function to delete an existing customer
+    def delete_customer(self):
+        user_id = self.user_id_entry.get()
+        if user_id in self.customers:
+            del self.customers[user_id]
+            messagebox.showinfo("Success", "Customer deleted successfully!")
+            self.save_data(self.customers, 'users.pkl')
+        else:
+            messagebox.showerror("Error", "User ID not found!")
+
+    # Function to modify customer details
+    def modify_customer(self):
+        user_id = self.user_id_entry.get()
+        if user_id in self.customers:
+            # Update user details
+            self.customers[user_id].set_name(self.name_entry.get())
+            self.customers[user_id].set_email(self.email_entry.get())
+            self.customers[user_id].set_contact_number(self.contact_entry.get())
+            messagebox.showinfo("Success", "Customer modified successfully!")
+            self.save_data(self.customers, 'users.pkl')
+        else:
+            messagebox.showerror("Error", "User ID not found!")
+
+    # Function to display all customers
+    def display_customers(self):
+        if not self.customers:
+            messagebox.showinfo("Customers", "No customers found!")
+        else:
+            # Display customer list in a message box
+            customer_list = "\n".join([f"{user_id}: {customer.get_name()}" for user_id, customer in self.customers.items()])
+            messagebox.showinfo("Customers", customer_list)
+
+    # Ticket Purchasing Tab
+    def setup_ticket_purchasing(self):
+        # UI Elements for Ticket Purchasing
+        ttk.Label(self.ticket_tab, text="Select Ticket Type:").grid(row=0, column=0, padx=10, pady=10)
+        self.ticket_type_var = tk.StringVar()
+        self.ticket_dropdown = ttk.Combobox(self.ticket_tab, textvariable=self.ticket_type_var, state="readonly")
+        self.ticket_dropdown['values'] = ["Single-Day Pass", "Two-Day Pass", "Annual Membership", "VIP", "Child Ticket",
+                                          "Group Ticket"]
+        self.ticket_dropdown.grid(row=0, column=1, padx=10, pady=10)
+
+        ttk.Label(self.ticket_tab, text="Quantity:").grid(row=1, column=0, padx=10, pady=10)
+        self.ticket_quantity_entry = ttk.Entry(self.ticket_tab)
+        self.ticket_quantity_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        ttk.Label(self.ticket_tab, text="Payment Method:").grid(row=2, column=0, padx=10, pady=10)
+        self.payment_method_var = tk.StringVar()
+        self.payment_dropdown = ttk.Combobox(self.ticket_tab, textvariable=self.payment_method_var, state="readonly")
+        self.payment_dropdown['values'] = ["Credit Card", "Debit Card"]
+        self.payment_dropdown.grid(row=2, column=1, padx=10, pady=10)
+
+        # Button to purchase tickets
+        ttk.Button(self.ticket_tab, text="Purchase Ticket", command=self.purchase_ticket).grid(row=3, column=0,
+                                                                                               columnspan=2, padx=10,
+                                                                                               pady=10)
+
+    # Function to purchase tickets
+    def purchase_ticket(self):
+        ticket_type = self.ticket_type_var.get()
+        quantity = self.ticket_quantity_entry.get()
+        payment_method = self.payment_method_var.get()
+
+        # Validate ticket details
+        if not ticket_type or not quantity.isdigit() or int(quantity) <= 0:
+            messagebox.showerror("Error", "Invalid ticket details!")
+            return
+
+        quantity = int(quantity)
+        if ticket_type not in self.ticket_sales:
+            self.ticket_sales[ticket_type] = 0
+        self.ticket_sales[ticket_type] += quantity
+
+        # Create and save the booking
+        user_id = self.user_id_entry.get()
+        user = self.customers.get(user_id, None)
+        if user:
+            # Create ticket and payment objects, and save the booking
+            ticket = SingleDayPass("T1", 100, "10:00 AM", "6:00 PM")  # Example ticket
+            payment = Payment("P1", None, 100 * quantity, payment_method, "Paid")
+            booking = Booking("B1", user, ticket, "2024-12-05", payment)
+            self.bookings.append(booking)
+            messagebox.showinfo("Success", f"Purchased {quantity} {ticket_type} tickets!")
+            self.save_data(self.bookings, 'bookings.pkl')  # Save the updated bookings
+
+    # Admin Dashboard Tab
+    def setup_admin_dashboard(self):
+        # UI Elements for Admin Dashboard
+        ttk.Label(self.admin_tab, text="Admin Dashboard").grid(row=0, column=0, padx=10, pady=10)
+        ttk.Button(self.admin_tab, text="View Ticket Sales", command=self.view_ticket_sales).grid(row=1, column=0,
+                                                                                                  padx=10, pady=10)
+        ttk.Button(self.admin_tab, text="Modify Discounts", command=self.modify_discounts).grid(row=2, column=0,
+                                                                                                padx=10, pady=10)
+
+    # Function to view ticket sales
+    def view_ticket_sales(self):
+        if not self.ticket_sales:
+            messagebox.showinfo("Sales Report", "No ticket sales yet!")
+        else:
+            # Display sales report in a message box
+            sales_report = "\n".join(
+                [f"{ticket_type}: {quantity}" for ticket_type, quantity in self.ticket_sales.items()])
+            messagebox.showinfo("Sales Report", sales_report)
+
+    # Function to modify ticket discounts
+    def modify_discounts(self):
+        ticket_type = simpledialog.askstring("Modify Discounts", "Enter ticket type:")
+        if ticket_type not in ["Single-Day Pass", "Two-Day Pass", "Annual Membership", "VIP", "Child Ticket",
+                               "Group Ticket"]:
+            messagebox.showerror("Error", "Invalid ticket type!")
+            return
+
+        new_discount = simpledialog.askstring("Modify Discounts", f"Enter new discount for {ticket_type}:")
+        messagebox.showinfo("Success", f"Discount for {ticket_type} updated to: {new_discount}")
+
+    # Function to load data from pickle
+    def load_data(self, filename):
+        try:
+            with open(filename, 'rb') as file:
+                return pickle.load(file)
+        except FileNotFoundError:
+            return {} if 'users' in filename else []
+
+    # Function to save data using pickle
+    def save_data(self, data, filename):
+        with open(filename, 'wb') as file:
+            pickle.dump(data, file)
+
+
+# Run the Application
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = TicketingSystemGUI(root)
+    root.mainloop()
